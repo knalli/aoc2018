@@ -11,7 +11,7 @@ import (
 
 /**
 Read a file and returning the lines as array (without newlines)
- */
+*/
 func ReadFileToArray(path string) ([]string, error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -25,6 +25,12 @@ func ReadFileToArray(path string) ([]string, error) {
 	var lines []string
 	for {
 		line, err := r.ReadString('\n')
+		if line != "" {
+			if line[len(line)-1] == '\n' {
+				line = line[0 : len(line)-1] // remove newline (last char)
+			}
+			lines = append(lines, line)
+		}
 		if err != nil {
 			if err == io.EOF {
 				break
@@ -33,14 +39,13 @@ func ReadFileToArray(path string) ([]string, error) {
 			log.Fatalf("read file line error: %v", err)
 			return nil, err
 		}
-		lines = append(lines, line[0:len(line)-1]) // remove newline (last char)
 	}
 	return lines, nil
 }
 
 /**
 Read a file and returns its content as one string
- */
+*/
 func ReadFileToString(path string) (*string, error) {
 	if lines, err := ReadFileToArray(path); err != nil {
 		return nil, err
