@@ -30,7 +30,7 @@ func main() {
 	fmt.Println()
 
 	fmt.Println("--- Part Two ---")
-	interval, index, result := findDuplicateResults(numbers)
+	interval, index, result := findFirstDuplicateResult(numbers, 1)
 	fmt.Printf("The first frequency reached is: %d (interval=%d, index=%d)\n", result, interval, index)
 	fmt.Println()
 }
@@ -61,7 +61,7 @@ func sumNumbers(numbers []int) int {
 	return result
 }
 
-func findDuplicateResults(numbers []int) (interval int, index int, result int) {
+func findFirstDuplicateResult(numbers []int, min int) (interval int, index int, result int) {
 
 	var counts = make(map[int]int)
 
@@ -73,7 +73,7 @@ func findDuplicateResults(numbers []int) (interval int, index int, result int) {
 		for index, i := range numbers {
 			result += i
 			counts[result] = counts[result] + 1
-			if counts[result] > 1 {
+			if counts[result] > min {
 				return interval, index, result
 			}
 		}
