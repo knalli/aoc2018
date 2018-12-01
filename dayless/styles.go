@@ -7,3 +7,16 @@ func PrintDayHeader(day int) {
 	fmt.Println("================================================================")
 	fmt.Println()
 }
+
+func PrintStepHeader(step int) {
+	switch step {
+	case 1:
+		fmt.Println("--- Part One ---")
+		break
+	case 2:
+		fmt.Println("--- Part Two ---")
+		break
+	default:
+		fmt.Println("--- Part ??? ---")
+	}
+}

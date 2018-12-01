@@ -15,7 +15,7 @@ func main() {
 	dayless.PrintDayHeader(AocDay)
 	defer dayless.TimeTrack(time.Now(), AocDayName)
 
-	fmt.Println("--- Part One ---")
+	dayless.PrintStepHeader(1)
 	lines, err := dayless.ReadFileToArray(AocDayName + "/puzzle1.txt")
 	if err != nil {
 		panic(err)
@@ -29,7 +29,7 @@ func main() {
 	fmt.Printf("The resulting frequency is: %d\n", sumNumbers(numbers))
 	fmt.Println()
 
-	fmt.Println("--- Part Two ---")
+	dayless.PrintStepHeader(2)
 	interval, index, result := findFirstDuplicateResult(numbers, 1)
 	fmt.Printf("The first frequency reached is: %d (interval=%d, index=%d)\n", result, interval, index)
 	fmt.Println()
