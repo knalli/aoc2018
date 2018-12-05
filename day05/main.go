@@ -23,8 +23,8 @@ func main() {
 	fmt.Println()
 
 	dayless.PrintStepHeader(2)
-	_, minLength, _ := findShortestReactedPolymer(polymerUnits)
-	fmt.Printf("Length of the shortest polymer: %d\n", minLength)
+	minLength, minLengthChar := findShortestReactedPolymer(polymerUnits)
+	fmt.Printf("Length of the shortest polymer: %d (%c)\n", minLength, minLengthChar)
 	fmt.Println()
 }
 
@@ -55,13 +55,14 @@ func reducePolymerUnits2(runes []rune) []rune {
 	return runes
 }
 
-func findShortestReactedPolymer(s string) (string, int, int32) {
+func findShortestReactedPolymer(s string) (int, int32) {
+	defer dayless.TimeTrack(time.Now(), "findShortestReactedPolymer")
 	var minLength = len(s)
 	var minLengthChar = 'a' - 1
 	for i := 'a'; i <= 'z'; i++ {
 		m := i % 32
 		s2 := strings.Map(func(r rune) rune {
-			if r%32 == m {
+			if r%32 == m { // mod 32 for matching a&A, b&B, ...
 				return -1
 			}
 			return r
@@ -72,5 +73,5 @@ func findShortestReactedPolymer(s string) (string, int, int32) {
 			minLengthChar = i
 		}
 	}
-	return s, minLength, minLengthChar
+	return minLength, minLengthChar
 }
