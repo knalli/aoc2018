@@ -202,16 +202,23 @@ func getOrderOfStepsParallel(instructions map[string][]string, workerSize int) (
 				}
 
 				if allRequiredStepsAreReady {
+					picked := false
 					for w := range workers {
 						worker := &workers[w]
 						if worker.availableAt <= second {
 							worker.step = step
 							worker.availableAt = second + int(i-4)
+							picked = true
 							break
 						}
 					}
-					stepsPicked = append(stepsPicked, step)
-					numberOfBusyWorkers++
+					if picked {
+						stepsPicked = append(stepsPicked, step)
+						numberOfBusyWorkers++
+					} else {
+						// looks like all workers are busy -> break loop
+						break
+					}
 				}
 			}
 
