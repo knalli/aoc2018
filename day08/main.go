@@ -17,17 +17,18 @@ func main() {
 
 	dayless.PrintStepHeader(1)
 	line, _ := dayless.ReadFileToString(AocDayName + "/puzzle.txt")
-	fmt.Printf("Sum of all metadata: %d\n", getSumOfAllMetadata(*line))
+	sum, value := getSumOfAllMetadataAndValues(*line)
+	fmt.Printf("Sum of all metadata: %d\n", sum)
 	fmt.Println()
 
 	dayless.PrintStepHeader(2)
-	fmt.Printf("The value of the root node: %d\n", 0)
+	fmt.Printf("The value of the root node: %d\n", value)
 	fmt.Println()
 }
 
-func getSumOfAllMetadata(line string) int {
-	sum, _ := infixWalkPart1(splitAsNumbers(line), 0)
-	return sum
+func getSumOfAllMetadataAndValues(line string) (int, int) {
+	sum, value, _ := infixWalk2(splitAsNumbers(line), 0)
+	return sum, value
 }
 
 func splitAsNumbers(line string) []int {
@@ -40,7 +41,7 @@ func splitAsNumbers(line string) []int {
 	return numbers
 }
 
-func infixWalkPart1(numbers []int, start int) (metadataSum int, distance int) {
+func infixWalk2(numbers []int, start int) (metadataSum int, value int, distance int) {
 
 	p := start
 	quantityChildren := numbers[p]
@@ -48,19 +49,29 @@ func infixWalkPart1(numbers []int, start int) (metadataSum int, distance int) {
 	quantityMetadata := numbers[p]
 	p++
 
+	childValues := make([]int, quantityChildren)
 	for i := 0; i < quantityChildren; i++ {
-		childMetadataSum, childDistance := infixWalkPart1(numbers, p)
-		metadataSum += childMetadataSum
+		childMetadataSum, childValue, childDistance := infixWalk2(numbers, p)
+		childValues[i] = childValue     // for value (part2)
+		metadataSum += childMetadataSum // for global sum (part1)
 		p += childDistance
 	}
 
 	// collect meta
 	for i := 0; i < quantityMetadata; i++ {
-		metadataSum += numbers[p]
+		entry := numbers[p]
 		p++
+		metadataSum += entry
+		if len(childValues) > 0 {
+			if entry <= len(childValues) {
+				value += childValues[entry-1]
+			} // or 0
+		} else {
+			value += entry
+		}
 	}
 
 	distance = p - start
 
-	return metadataSum, distance
+	return metadataSum, value, distance
 }
