@@ -21,12 +21,12 @@ func main() {
 	fmt.Println()
 
 	dayless.PrintStepHeader(2)
-	fmt.Println("N/A")
+	fmt.Printf("The value of the root node: %d\n", 0)
 	fmt.Println()
 }
 
 func getSumOfAllMetadata(line string) int {
-	sum, _ := infixWalk2(splitAsNumbers(line), 0)
+	sum, _ := infixWalkPart1(splitAsNumbers(line), 0)
 	return sum
 }
 
@@ -40,7 +40,7 @@ func splitAsNumbers(line string) []int {
 	return numbers
 }
 
-func infixWalk2(numbers []int, start int) (metadataSum int, distance int) {
+func infixWalkPart1(numbers []int, start int) (metadataSum int, distance int) {
 
 	p := start
 	quantityChildren := numbers[p]
@@ -49,7 +49,7 @@ func infixWalk2(numbers []int, start int) (metadataSum int, distance int) {
 	p++
 
 	for i := 0; i < quantityChildren; i++ {
-		childMetadataSum, childDistance := infixWalk2(numbers, p)
+		childMetadataSum, childDistance := infixWalkPart1(numbers, p)
 		metadataSum += childMetadataSum
 		p += childDistance
 	}
