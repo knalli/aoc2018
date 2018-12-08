@@ -17,7 +17,7 @@ func main() {
 
 	dayless.PrintStepHeader(1)
 	line, _ := dayless.ReadFileToString(AocDayName + "/puzzle.txt")
-	fmt.Printf("Sum of all metadata: %d", getSumOfAllMetadata(*line))
+	fmt.Printf("Sum of all metadata: %d\n", getSumOfAllMetadata(*line))
 	fmt.Println()
 
 	dayless.PrintStepHeader(2)
