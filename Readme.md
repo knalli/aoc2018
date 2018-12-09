@@ -27,3 +27,6 @@ First, ensure dependencies are installed.
 For running the day `test001`
 * CLI: just enter `go test001/main.go`
 * IDE (like IntelliJ/Golang): just execute the `test001/main.go`.
+
+## License / Copyright
+Everything is free for all. Licensed under MIT. Copyright Jan Philipp
