@@ -48,7 +48,7 @@ func extractParams(line string) (int, int, error) {
 	return players, lastMarble, nil
 }
 
-func playTheGame(numPlayers int, stop int) (int, int, int) {
+func playTheGame(numPlayers int, lastMarble int) (int, int, int) {
 
 	defer dayless.TimeTrack(time.Now(), "play the game")
 
@@ -59,20 +59,14 @@ func playTheGame(numPlayers int, stop int) (int, int, int) {
 	current := &zero
 
 	playerScores := make(map[int]int, numPlayers)
-	/*
-		for i := 0; i < len(playerScores); i++ {
-			playerScores[i] = 0
-		}*/
 
-	currentPlayer := 0
-	marble := 1
-	for ; ; marble++ {
+	for marble := 1; marble <= lastMarble; marble++ {
+		currentPlayer := marble % numPlayers
 		if marble%23 == 0 {
 			// scoring
-			playerScores[currentPlayer] += marble // add current marble value as score
-			// removing marble 7*left
-			target := current.left.left.left.left.left.left.left
-			playerScores[currentPlayer] += target.value
+			playerScores[currentPlayer-1] += marble              // add current marble value as score
+			target := current.left.left.left.left.left.left.left // removing marble 7*left
+			playerScores[currentPlayer-1] += target.value
 			// aka remove item in link list
 			before := target.left
 			after := target.right
@@ -80,8 +74,7 @@ func playTheGame(numPlayers int, stop int) (int, int, int) {
 			after.left = before
 			current = after
 		} else {
-			// placing new marble 2*right
-			target := current.right.right
+			target := current.right.right // placing new marble 2*right
 			// aka add item in link list
 			before := target.left
 			placed := &link{left: before, right: target, value: marble}
@@ -91,17 +84,10 @@ func playTheGame(numPlayers int, stop int) (int, int, int) {
 		}
 
 		if debug {
-			fmt.Printf("[%d] {%6d}", currentPlayer+1, playerScores[currentPlayer])
+			fmt.Printf("[%d] {%6d}", currentPlayer, playerScores[currentPlayer-1])
 			printRow(&zero)
 			fmt.Println()
 		}
-
-		if marble == stop {
-			break
-		}
-
-		// next player
-		currentPlayer = (currentPlayer + 1) % numPlayers
 	}
 
 	maxScore := 0
@@ -111,7 +97,7 @@ func playTheGame(numPlayers int, stop int) (int, int, int) {
 		}
 	}
 
-	return numPlayers, marble, maxScore
+	return numPlayers, lastMarble, maxScore
 }
 
 func printRow(start *link) {

@@ -43,7 +43,7 @@ func extractParams(line string) (int, int, error) {
 	return players, lastMarble, nil
 }
 
-func playTheGame2(numPlayers int, stop int) (int, int, int) {
+func playTheGame2(numPlayers int, lastMarble int) (int, int, int) {
 
 	defer dayless.TimeTrack(time.Now(), "play the game")
 
@@ -52,9 +52,8 @@ func playTheGame2(numPlayers int, stop int) (int, int, int) {
 
 	playerScores := make(map[int]int, numPlayers)
 
-	currentPlayer := 0
-	marble := 1
-	for ; ; marble++ {
+	for marble := 1; marble <= lastMarble; marble++ {
+		currentPlayer := marble % numPlayers
 		if marble%23 == 0 {
 			// scoring
 			playerScores[currentPlayer] += marble // add current marble value as score
@@ -65,13 +64,6 @@ func playTheGame2(numPlayers int, stop int) (int, int, int) {
 			d.Rotate(2)
 			d.Append(marble)
 		}
-
-		if marble == stop {
-			break
-		}
-
-		// next player
-		currentPlayer = (currentPlayer + 1) % numPlayers
 	}
 
 	maxScore := 0
@@ -81,5 +73,5 @@ func playTheGame2(numPlayers int, stop int) (int, int, int) {
 		}
 	}
 
-	return numPlayers, marble, maxScore
+	return numPlayers, lastMarble, maxScore
 }
