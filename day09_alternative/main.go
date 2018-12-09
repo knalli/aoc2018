@@ -11,7 +11,7 @@ import (
 )
 
 const AocDay = 9
-const AocDayName = "day09"
+const AocDayName = "day09_alternative"
 
 func main() {
 	dayless.PrintDayHeader(AocDay)
