@@ -24,7 +24,8 @@ func main() {
 	fmt.Println()
 
 	dayless.PrintStepHeader(2)
-	fmt.Println("N/A")
+	players, lastMarbleWorth, highScore = playTheGame(gameParamPlayers, gameParamMaxMarble*100)
+	fmt.Printf("%d players; last marble is worth %d points: high score is %d\n", players, lastMarbleWorth, highScore)
 	fmt.Println()
 }
 
