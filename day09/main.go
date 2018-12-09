@@ -18,7 +18,8 @@ func main() {
 
 	dayless.PrintStepHeader(1)
 	line, _ := dayless.ReadFileToString(AocDayName + "/puzzle.txt")
-	players, lastMarbleWorth, highScore := playTheGameByString(*line)
+	gameParamPlayers, gameParamMaxMarble, _ := extractParams(*line)
+	players, lastMarbleWorth, highScore := playTheGame(gameParamPlayers, gameParamMaxMarble)
 	fmt.Printf("%d players; last marble is worth %d points: high score is %d\n", players, lastMarbleWorth, highScore)
 	fmt.Println()
 
@@ -33,11 +34,17 @@ type link struct {
 	value int
 }
 
-func playTheGameByString(line string) (int, int, int) {
+func extractParams(line string) (int, int, error) {
 	parts := strings.Split(line, " ")
-	players, _ := strconv.Atoi(parts[0])
-	lastMarble, _ := strconv.Atoi(parts[6])
-	return playTheGame(players, lastMarble)
+	players, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return 0, 0, err
+	}
+	lastMarble, err := strconv.Atoi(parts[6])
+	if err != nil {
+		return 0, 0, err
+	}
+	return players, lastMarble, nil
 }
 
 func playTheGame(numPlayers int, stop int) (int, int, int) {
