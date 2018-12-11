@@ -20,13 +20,13 @@ func main() {
 	serialNo, _ := strconv.Atoi(*line)
 	topLeftX, topLeftRight, powerSum := findGridFuelCell(serialNo, 300, 3)
 	fmt.Printf("👉 The largtest power square is @ %d,%d with the power sum of %d\n", topLeftX, topLeftRight, powerSum)
-	fmt.Printf("🎉 Final answer: %[1]d,%[2]d\n", topLeftX, topLeftRight, powerSum)
+	fmt.Printf("🎉 Final answer: %d,%d\n", topLeftX, topLeftRight)
 	fmt.Println()
 
 	dayless.PrintStepHeader(2)
 	topLeftX, topLeftRight, powerSum, maxSquareSize := findMaxFuelGridSize(serialNo, 300)
 	fmt.Printf("👉 The largtest total power square is @ %d,%d with the power sum of %d and a max square of %d\n", topLeftX, topLeftRight, powerSum, maxSquareSize)
-	fmt.Printf("🎉 Final answer: %[1]d,%[2]d\n", topLeftX, topLeftRight, powerSum)
+	fmt.Printf("🎉 Final answer: %d,%d,%d\n", topLeftX, topLeftRight, powerSum)
 	fmt.Println()
 }
 
