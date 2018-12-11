@@ -18,7 +18,6 @@ func main() {
 	dayless.PrintStepHeader(1)
 	line, _ := dayless.ReadFileToString(AocDayName + "/puzzle.txt")
 	serialNo, _ := strconv.Atoi(*line)
-	fmt.Println(serialNo)
 	topLeftX, topLeftRight, powerSum := findGridFuelCell(serialNo, 300, 3)
 	fmt.Printf("The largtest power square is @ (%d,%d) with the power sum of %d\n", topLeftX, topLeftRight, powerSum)
 	fmt.Println()
@@ -61,13 +60,6 @@ func findGridFuelCell(serialNo int, size int, squareSize int) (int, int, int) {
 	return maxTLCoordinateX, maxTLCoordinateY, maxPowerLevelSum
 }
 
-type stat struct {
-	x          int
-	y          int
-	totalPower int
-	squareSize int
-}
-
 func findMaxFuelGridSize(serialNo int, size int) (int, int, int, int) {
 
 	maxTLCoordinateX := 0
@@ -75,40 +67,18 @@ func findMaxFuelGridSize(serialNo int, size int) (int, int, int, int) {
 	maxPowerLevelSum := math.MinInt16
 	maxSquareSize := 0
 
-	requests := make(chan int)
-	done := make(chan bool)
-
-	go func() {
-		for {
-			n, more := <-requests
-			if !more {
-				done <- true
-				return
-			}
-			x, y, s := findGridFuelCell(serialNo, size, n)
-			stat := stat{
-				x:          x,
-				y:          y,
-				totalPower: s,
-				squareSize: n,
-			}
-
-			if stat.totalPower > maxPowerLevelSum {
-				maxPowerLevelSum = stat.totalPower
-				maxTLCoordinateX = stat.x
-				maxTLCoordinateY = stat.y
-				maxSquareSize = stat.squareSize
-
-				fmt.Printf("⏳ Found %d,%d power=%d, size=%d …\n", stat.x, stat.y, stat.totalPower, stat.squareSize)
-			}
-		}
-	}()
 	for n := 1; n <= size; n++ {
-		requests <- n
-	}
-	close(requests)
+		x, y, powerLevelSum := findGridFuelCell(serialNo, size, n)
 
-	<-done
+		if powerLevelSum > maxPowerLevelSum {
+			maxPowerLevelSum = powerLevelSum
+			maxTLCoordinateX = x
+			maxTLCoordinateY = y
+			maxSquareSize = n
+
+			fmt.Printf("⏳ Found %d,%d power=%d, size=%d …\n", x, y, powerLevelSum, n)
+		}
+	}
 
 	return maxTLCoordinateX, maxTLCoordinateY, maxPowerLevelSum, maxSquareSize
 }
