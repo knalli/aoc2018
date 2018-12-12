@@ -30,111 +30,106 @@ func main() {
 	fmt.Println()
 }
 
-type cell struct {
-	rackId     int
-	powerLevel int
-}
-
-func findGridFuelCell(serialNo int, size int, squareSize int) (int, int, int) {
-	grid := buildFuelGrid(serialNo, size)
+func findGridFuelCell(serialNo int, gridSize int, squareSize int) (int, int, int) {
+	grid := buildFuelGrid(serialNo, gridSize)
 	gridSummedArea := buildSummedAreaGrid(grid)
 
-	maxTLCoordinateX := 0
-	maxTLCoordinateY := 0
+	maxPowerLevelX := 0
+	maxPowerLevelY := 0
 	maxPowerLevelSum := math.MinInt16
 	squareSizeOffset := squareSize - 1
-	for y := squareSizeOffset; y < size; y++ {
-		for x := squareSizeOffset; x < size; x++ {
-			lowerRight := gridSummedArea[y][x].powerLevel
+	for y := squareSizeOffset; y < gridSize; y++ {
+		for x := squareSizeOffset; x < gridSize; x++ {
+			lowerRight := gridSummedArea[y][x]
 			up := 0
 			if y-squareSizeOffset > 0 {
 				// up
-				up = gridSummedArea[y-squareSize][x].powerLevel
+				up = gridSummedArea[y-squareSize][x]
 			}
 			left := 0
 			if x-squareSizeOffset > 0 {
 				// left
-				left = gridSummedArea[y][x-squareSize].powerLevel
+				left = gridSummedArea[y][x-squareSize]
 			}
 			upperLeft := 0
 			if y-squareSizeOffset > 0 && x-squareSizeOffset > 0 {
 				// upperLeft
-				upperLeft = gridSummedArea[y-squareSize][x-squareSize].powerLevel
+				upperLeft = gridSummedArea[y-squareSize][x-squareSize]
 			}
 			sum := lowerRight - up - left + upperLeft
 			if sum > maxPowerLevelSum {
 				maxPowerLevelSum = sum
-				maxTLCoordinateX = x - squareSizeOffset
-				maxTLCoordinateY = y - squareSizeOffset
+				maxPowerLevelX = x - squareSizeOffset
+				maxPowerLevelY = y - squareSizeOffset
 			}
 		}
 	}
 
-	return maxTLCoordinateX + 1, maxTLCoordinateY + 1, maxPowerLevelSum
+	return maxPowerLevelX + 1, maxPowerLevelY + 1, maxPowerLevelSum
 }
 
-func findMaxFuelGridSize(serialNo int, size int) (int, int, int, int) {
+func findMaxFuelGridSize(serialNo int, gridSize int) (int, int, int, int) {
 
-	maxTLCoordinateX := 0
-	maxTLCoordinateY := 0
+	maxPowerLevelX := 0
+	maxPowerLevelY := 0
 	maxPowerLevelSum := math.MinInt16
 	maxSquareSize := 0
 
-	for n := 1; n <= size; n++ {
-		x, y, powerLevelSum := findGridFuelCell(serialNo, size, n)
+	for squareSize := 1; squareSize <= gridSize; squareSize++ {
+		x, y, powerLevelSum := findGridFuelCell(serialNo, gridSize, squareSize)
 
 		if powerLevelSum > maxPowerLevelSum {
 			maxPowerLevelSum = powerLevelSum
-			maxTLCoordinateX = x
-			maxTLCoordinateY = y
-			maxSquareSize = n
+			maxPowerLevelX = x
+			maxPowerLevelY = y
+			maxSquareSize = squareSize
 
-			fmt.Printf("⏳ Found %d,%d power=%d, size=%d …\n", x, y, powerLevelSum, n)
+			fmt.Printf("⏳ Found %d,%d power=%d, size=%d …\n", x, y, powerLevelSum, squareSize)
 		}
 	}
 
-	return maxTLCoordinateX, maxTLCoordinateY, maxPowerLevelSum, maxSquareSize
+	return maxPowerLevelX, maxPowerLevelY, maxPowerLevelSum, maxSquareSize
 }
 
-func buildFuelGrid(serialNo int, size int) [][]cell {
-	grid := make([][]cell, size)
+func buildFuelGrid(serialNo int, size int) [][]int {
+	grid := make([][]int, size)
 	for y := 1; y <= size; y++ {
-		grid[y-1] = make([]cell, size)
+		grid[y-1] = make([]int, size)
 		for x := 1; x <= size; x++ {
 			rackId := x + 10
-			temp := rackId * y
-			temp += serialNo
-			temp *= rackId
-			temp = (temp % 1000) / 100 // "The hundreds digit"
-			temp -= 5
-			grid[y-1][x-1] = cell{rackId: rackId, powerLevel: temp}
+			powerLevel := rackId * y
+			powerLevel += serialNo
+			powerLevel *= rackId
+			powerLevel = (powerLevel % 1000) / 100 // "The hundreds digit"
+			powerLevel -= 5
+			grid[y-1][x-1] = powerLevel
 		}
 	}
 	return grid
 }
 
-func buildSummedAreaGrid(grid [][]cell) [][]cell {
+func buildSummedAreaGrid(grid [][]int) [][]int {
 	sizeY := len(grid)
-	result := make([][]cell, sizeY)
+	result := make([][]int, sizeY)
 	for y := 0; y < sizeY; y++ {
 		sizeX := len(grid[y])
-		result[y] = make([]cell, sizeX)
+		result[y] = make([]int, sizeX)
 		for x := 0; x < sizeX; x++ {
-			powerLevel := grid[y][x].powerLevel
+			powerLevel := grid[y][x]
 			up := 0
 			if y > 0 {
-				up = result[y-1][x].powerLevel
+				up = result[y-1][x]
 			}
 			left := 0
 			if x > 0 {
-				left = result[y][x-1].powerLevel
+				left = result[y][x-1]
 			}
 			upperLeft := 0
 			if y > 0 && x > 0 {
-				upperLeft = result[y-1][x-1].powerLevel
+				upperLeft = result[y-1][x-1]
 			}
 			sum := powerLevel + up + left - upperLeft
-			result[y][x] = cell{rackId: 0, powerLevel: sum}
+			result[y][x] = sum
 		}
 	}
 	return result
