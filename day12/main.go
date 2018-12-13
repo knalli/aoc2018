@@ -65,30 +65,12 @@ type memory struct {
 func runNextGenerations(generations int64, state *state, rules []rule) {
 	defer dayless.TimeTrack(time.Now(), fmt.Sprintf("runNextGenerations=%d", generations))
 
-	/*
-		m := make([]memory, 0)
-		m = append(m, memory{value: state.value, generation: 0})
-	*/
-
 	generationSums := make([]int64, 0)
 	generationSums = append(generationSums, sumOfFilledItemIndexes(state))
 
 	for g := int64(0); g < generations; g++ {
 		runNextGeneration(state, rules)
 		generationSums = append(generationSums, sumOfFilledItemIndexes(state))
-		/*
-			found := false
-			for i := range m {
-				if m[i].value == state.value {
-					fmt.Print("MATCH")
-					found = true
-					break
-				}
-			}
-			if !found {
-				m = append(m, memory{value: state.value, generation: g+1})
-			}
-		*/
 		if debug {
 			printState(g+1, state)
 		}
