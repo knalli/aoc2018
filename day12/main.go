@@ -18,15 +18,14 @@ func main() {
 	dayless.PrintStepHeader(1)
 	lines, _ := dayless.ReadFileToArray(AocDayName + "/puzzle.txt")
 	state, rules := readPuzzle(lines)
-	runNextGenerations(20, state, rules)
-	fmt.Printf("🎉 The sum of the numbers of all pots which contain a plant: %d\n", sumOfFilledItemIndexes(state))
+	result := runNextGenerations(20, state, rules)
+	fmt.Printf("🎉 The sum of the numbers of all pots which contain a plant: %d\n", result)
 	fmt.Println()
 
 	dayless.PrintStepHeader(2)
 	// TODO after generation ~166, this are adding 73 for each constantly, running for 50000000000 is too slow
-	// runNextGenerations(50000000000-20, state, rules)
-	runNextGenerations(180, state, rules)
-	fmt.Printf("🎉 The sum of the numbers of all pots which contain a plant: %d\n", sumOfFilledItemIndexes(state)+((50000000000-200)*73))
+	result = runNextGenerations(50000000000-20, state, rules)
+	fmt.Printf("🎉 The sum of the numbers of all pots which contain a plant: %d\n", result)
 	fmt.Println()
 }
 
@@ -57,32 +56,41 @@ func readPuzzle(lines []string) (*state, []rule) {
 	return &state{value: initialState, offset: 0}, rules
 }
 
-type memory struct {
-	value      string
-	generation int64
-}
-
-func runNextGenerations(generations int64, state *state, rules []rule) {
+func runNextGenerations(generations int64, state *state, rules []rule) int64 {
 	defer dayless.TimeTrack(time.Now(), fmt.Sprintf("runNextGenerations=%d", generations))
 
-	generationSums := make([]int64, 0)
-	generationSums = append(generationSums, sumOfFilledItemIndexes(state))
+	lastSum := int64(0)
+	lastDiff := int64(0)
+	diffStrikes := 0
 
-	for g := int64(0); g < generations; g++ {
+	g := int64(0)
+	strikeLengthRequired := int(float64(generations) * 0.00000001)
+	if strikeLengthRequired < 100 {
+		strikeLengthRequired = int(generations)
+	}
+	fmt.Printf("👉 Require a strike-length of at least %d\n", strikeLengthRequired)
+	for ; g < generations && diffStrikes < strikeLengthRequired; g++ {
 		runNextGeneration(state, rules)
-		generationSums = append(generationSums, sumOfFilledItemIndexes(state))
+		sum := sumOfFilledItemIndexes(state)
+		diff := sum - lastSum
 		if debug {
-			printState(g+1, state)
+			fmt.Printf("👉 %6d = %6d [%6d]\n", g, sum, diff)
+		}
+		lastSum = sum
+		if lastDiff == diff {
+			diffStrikes++
+		} else {
+			diffStrikes = 0 // reset
+			lastDiff = diff
 		}
 	}
 
-	for i, x := range generationSums {
-		p := int64(0)
-		if i > 0 {
-			p = int64(x) - int64(generationSums[i-1])
-		}
-		fmt.Printf("👉 %6d = %6d [%6d]\n", i, x, p)
+	if g < generations {
+		fmt.Printf("👉 After %d generations, a %d-strike of diff %d has been detected.\n", g, diffStrikes, lastDiff)
+		fmt.Printf("👉 Assuming this value is constant for the %d generations left.\n", generations-g)
 	}
+
+	return lastSum + ((generations - g) * lastDiff)
 }
 
 func runNextGeneration(state *state, rules []rule) {
