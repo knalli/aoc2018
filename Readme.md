@@ -1,19 +1,19 @@
 # Advent of Code 2018 Solutions
-Welcome to the solutions of [Advent Of Code](http://adventofcode.com) 2018 (AOC 2018).
+Welcome to my solutions of [Advent Of Code](http://adventofcode.com) 2018 (AOC 2018).
 
 A huge thanks to @topaz and his team for providing this great service.  
 
 ## Disclaimer
-This are my personal solutions of the Advent Of Code (AOC) 2018. This code is 
+These are my personal solutions of the Advent Of Code (AOC) 2018. The code is 
 *not indented* to be perfect in any kind of area. This year, my personal 
-competition was to learn more about Go. This snippets are here for everyone
+competition was to learn more about Go. These snippets are here for everyone
 learning more, too. 
 
 If you think, there is a piece of improvement: Go to the code, 
 fill a PR and we are all happy. Share the knowledge. 
 
 ## Structure
-The AOC contains 24 days with at least one puzzle/question per day.
+The AOC contains 24 days with at least one puzzle/question per day (mostly there are two parts).
 
 * Base path is the root folder.
 * Each day has has sub module named `day01`, `day02` until `day24`.
@@ -29,4 +29,6 @@ For running the day `test001`
 * IDE (like IntelliJ/Golang): just execute the `test001/main.go`.
 
 ## License / Copyright
-Everything is free for all. Licensed under MIT. Copyright Jan Philipp
+Everything is free for all.
+
+Licensed under MIT. Copyright Jan Philipp.
