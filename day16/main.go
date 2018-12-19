@@ -1,6 +1,7 @@
 package main
 
 import (
+	"de.knallisworld/aoc/aoc2018/day16/lib"
 	"de.knallisworld/aoc/aoc2018/dayless"
 	"fmt"
 	"regexp"
@@ -31,77 +32,10 @@ func main() {
 	fmt.Println()
 }
 
-type State struct {
-	Registers []int
-}
-
-func (s State) Clone() State {
-	registers := make([]int, len(s.Registers))
-	copy(registers, s.Registers)
-	return State{
-		Registers: registers,
-	}
-}
-
-func (s State) Equal(o State) bool {
-	if len(s.Registers) != len(o.Registers) {
-		return false
-	}
-	for i := range s.Registers {
-		if s.Registers[i] != o.Registers[i] {
-			return false
-		}
-	}
-	return true
-}
-
-type UnknownInstruction struct {
-	OpCode int
-	Input1 int
-	Input2 int
-	Output int
-}
-
-func (i UnknownInstruction) ToString() string {
-	return fmt.Sprintf("%d %d %d %d", i.OpCode, i.Input1, i.Input2, i.Output)
-}
-
-type Instruction struct {
-	OpCode OpCode
-	Input1 int
-	Input2 int
-	Output int
-}
-
-func (i Instruction) ToString() string {
-	return fmt.Sprintf("%s %d %d %d", i.OpCode, i.Input1, i.Input2, i.Output)
-}
-
-type OpCode string
-
-const (
-	addr OpCode = "addr"
-	addi OpCode = "addi"
-	mulr OpCode = "mulr"
-	muli OpCode = "muli"
-	banr OpCode = "banr"
-	bani OpCode = "bani"
-	borr OpCode = "borr"
-	bori OpCode = "bori"
-	setr OpCode = "setr"
-	seti OpCode = "seti"
-	gtir OpCode = "gtir"
-	gtri OpCode = "gtri"
-	gtrr OpCode = "gtrr"
-	eqir OpCode = "eqir"
-	eqri OpCode = "eqri"
-	eqrr OpCode = "eqrr"
-)
-
 type Sample struct {
-	Before      State
-	Instruction UnknownInstruction
-	After       State
+	Before      lib.State
+	Instruction lib.UnknownInstruction
+	After       lib.State
 }
 
 type Samples []Sample
@@ -129,7 +63,7 @@ func readSamples(lines []string) (Samples, int) {
 	return result, i
 }
 
-func extractState(matches []string) State {
+func extractState(matches []string) lib.State {
 	registers := make([]int, 4)
 	if len(matches) != 5 {
 		panic("unexpected size of matches (should be 5)")
@@ -137,15 +71,15 @@ func extractState(matches []string) State {
 	for i := 0; i < 4; i++ {
 		registers[i] = parseInt(matches[i+1])
 	}
-	return State{
+	return lib.State{
 		Registers: registers,
 	}
 }
 
-func extractUnknownInstruction(line string) UnknownInstruction {
+func extractUnknownInstruction(line string) lib.UnknownInstruction {
 	parts := strings.Split(line, " ")
 
-	return UnknownInstruction{
+	return lib.UnknownInstruction{
 		OpCode: parseInt(parts[0]),
 		Input1: parseInt(parts[1]),
 		Input2: parseInt(parts[2]),
@@ -161,91 +95,17 @@ func parseInt(s string) int {
 	return i
 }
 
-func executeInstruction(s State, i Instruction) State {
-	result := s.Clone()
-	r := result.Registers
-	switch i.OpCode {
-	case addr:
-		r[i.Output] = r[i.Input1] + r[i.Input2]
-	case addi:
-		r[i.Output] = r[i.Input1] + i.Input2
-	case mulr:
-		r[i.Output] = r[i.Input1] * r[i.Input2]
-	case muli:
-		r[i.Output] = r[i.Input1] * i.Input2
-	case banr:
-		r[i.Output] = r[i.Input1] & r[i.Input2]
-	case bani:
-		r[i.Output] = r[i.Input1] & i.Input2
-	case borr:
-		r[i.Output] = r[i.Input1] | r[i.Input2]
-	case bori:
-		r[i.Output] = r[i.Input1] | i.Input2
-	case setr:
-		r[i.Output] = r[i.Input1]
-	case seti:
-		r[i.Output] = i.Input1
-	case gtir:
-		if i.Input1 > r[i.Input2] {
-			r[i.Output] = 1
-		} else {
-			r[i.Output] = 0
-		}
-	case gtri:
-		if r[i.Input1] > i.Input2 {
-			r[i.Output] = 1
-		} else {
-			r[i.Output] = 0
-		}
-	case gtrr:
-		if r[i.Input1] > r[i.Input2] {
-			r[i.Output] = 1
-		} else {
-			r[i.Output] = 0
-		}
-	case eqir:
-		if i.Input1 == r[i.Input2] {
-			r[i.Output] = 1
-		} else {
-			r[i.Output] = 0
-		}
-	case eqri:
-		if r[i.Input1] == i.Input2 {
-			r[i.Output] = 1
-		} else {
-			r[i.Output] = 0
-		}
-	case eqrr:
-		if r[i.Input1] == r[i.Input2] {
-			r[i.Output] = 1
-		} else {
-			r[i.Output] = 0
-		}
-	default:
-		panic("this opcode is unknown: " + i.OpCode)
-	}
-	return result
-}
+func resolveOpCodeBehaviours(before lib.State, after lib.State, instruction lib.UnknownInstruction) []lib.OpCode {
+	matchingOpCodes := make([]lib.OpCode, 0)
 
-func resolveOpCodeBehaviours(before State, after State, instruction UnknownInstruction) []OpCode {
-	matchingOpCodes := make([]OpCode, 0)
-
-	for _, oc := range []OpCode{
-		addr, addi,
-		mulr, muli,
-		banr, bani,
-		borr, bori,
-		setr, seti,
-		gtir, gtri, gtrr,
-		eqir, eqri, eqrr,
-	} {
-		testInstruction := Instruction{
+	for _, oc := range lib.ALL_OPCODES {
+		testInstruction := lib.Instruction{
 			OpCode: oc,
 			Input1: instruction.Input1,
 			Input2: instruction.Input2,
 			Output: instruction.Output,
 		}
-		if executeInstruction(before, testInstruction).Equal(after) {
+		if testInstruction.Execute(before).Equal(after) {
 			matchingOpCodes = append(matchingOpCodes, oc)
 		}
 	}
@@ -267,18 +127,10 @@ func checkInstructionsForOpCodeBehaviours(samples Samples, threshold int) {
 	fmt.Printf("🎉 Totally, %d samples behave like %d or more opcodes\n", total, threshold)
 }
 
-func resolveOpCodes(samples Samples) (result map[OpCode]int) {
-	result = make(map[OpCode]int)
-	ocCandidates := make(map[OpCode][]int)
-	for _, oc := range []OpCode{
-		addr, addi,
-		mulr, muli,
-		banr, bani,
-		borr, bori,
-		setr, seti,
-		gtir, gtri, gtrr,
-		eqir, eqri, eqrr,
-	} {
+func resolveOpCodes(samples Samples) (result map[lib.OpCode]int) {
+	result = make(map[lib.OpCode]int)
+	ocCandidates := make(map[lib.OpCode][]int)
+	for _, oc := range lib.ALL_OPCODES {
 		ocCandidates[oc] = []int{}
 	}
 	for _, sample := range samples {
@@ -299,9 +151,9 @@ func resolveOpCodes(samples Samples) (result map[OpCode]int) {
 	return result
 }
 
-func reduceCandidatesIfMatchingOne(operations map[OpCode][]int) {
+func reduceCandidatesIfMatchingOne(operations map[lib.OpCode][]int) {
 
-	uniqueOperations := make(map[OpCode]int)
+	uniqueOperations := make(map[lib.OpCode]int)
 
 	for {
 		for operation, operationCodes := range operations {
@@ -324,9 +176,9 @@ func reduceCandidatesIfMatchingOne(operations map[OpCode][]int) {
 	}
 }
 
-func readInstructions(lines []string, linesOffset int, opcodeMap map[OpCode]int) (result []Instruction) {
+func readInstructions(lines []string, linesOffset int, opcodeMap map[lib.OpCode]int) (result []lib.Instruction) {
 	// flip map
-	codeMap := make(map[int]OpCode)
+	codeMap := make(map[int]lib.OpCode)
 	for op, code := range opcodeMap {
 		codeMap[code] = op
 	}
@@ -337,7 +189,7 @@ func readInstructions(lines []string, linesOffset int, opcodeMap map[OpCode]int)
 			continue
 		}
 		parts := strings.Split(line, " ")
-		result = append(result, Instruction{
+		result = append(result, lib.Instruction{
 			OpCode: codeMap[parseInt(parts[0])],
 			Input1: parseInt(parts[1]),
 			Input2: parseInt(parts[2]),
@@ -348,13 +200,13 @@ func readInstructions(lines []string, linesOffset int, opcodeMap map[OpCode]int)
 	return result
 }
 
-func compute(instructions []Instruction) State {
-	state := State{
+func compute(instructions []lib.Instruction) lib.State {
+	state := lib.State{
 		Registers: []int{0, 0, 0, 0},
 	}
 
 	for _, instruction := range instructions {
-		state = executeInstruction(state, instruction)
+		state = instruction.Execute(state)
 	}
 
 	return state
