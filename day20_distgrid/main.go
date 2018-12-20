@@ -10,7 +10,7 @@ import (
 )
 
 const AocDay = 20
-const AocDayName = "day20_distgrid"
+const AocDayName = "day20"
 
 func main() {
 	dayless.PrintDayHeader(AocDay)
@@ -22,7 +22,7 @@ func main() {
 	fmt.Println()
 
 	dayless.PrintStepHeader(2)
-	fmt.Println("N/A")
+	fmt.Println("See Part1")
 	fmt.Println()
 }
 

@@ -28,7 +28,7 @@ func main() {
 	fmt.Println()
 
 	dayless.PrintStepHeader(2)
-	fmt.Println("N/A")
+	fmt.Println("See Part1")
 	fmt.Println()
 }
 
