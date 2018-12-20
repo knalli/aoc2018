@@ -14,6 +14,17 @@ func NewByChars(fields [][]rune) Grid {
 	return Grid{fields: fields}
 }
 
+func NewByDimension(height int, width int, r rune) Grid {
+	fields := make([][]rune, height)
+	for y := 0; y < width; y++ {
+		fields[y] = make([]rune, width)
+		for x := 0; x < height; x++ {
+			fields[y][x] = r
+		}
+	}
+	return Grid{fields: fields}
+}
+
 func NewByStrings(lines []string) Grid {
 	fields := make([][]rune, len(lines))
 	for i, line := range lines {
@@ -71,6 +82,15 @@ func (g Grid) ToStringWithBorder() string {
 func (g Grid) Walk(f func(p Point, value rune)) {
 	g.WalkBreakable(func(p Point, value rune) bool {
 		f(p, value)
+		return true
+	})
+}
+
+func (g Grid) WalkAndModify(f func(p Point, value rune, cb func(v rune))) {
+	g.WalkBreakable(func(p Point, value rune) bool {
+		f(p, value, func(newValue rune) {
+			g.fields[p.Y][p.X] = newValue
+		})
 		return true
 	})
 }
@@ -154,6 +174,22 @@ func (p Point) ToString() string {
 
 func (p Point) GetGridPosition(grid *Grid) int {
 	return grid.Width()*p.Y + p.X
+}
+
+func (p Point) Top() Point {
+	return Point{X: p.X, Y: p.Y - 1}
+}
+
+func (p Point) Right() Point {
+	return Point{X: p.X + 1, Y: p.Y}
+}
+
+func (p Point) Bottom() Point {
+	return Point{X: p.X, Y: p.Y + 1}
+}
+
+func (p Point) Left() Point {
+	return Point{X: p.X - 1, Y: p.Y}
 }
 
 type Points []Point
