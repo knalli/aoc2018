@@ -1,5 +1,7 @@
 package lib
 
+import "fmt"
+
 type State struct {
 	Registers []int
 }
@@ -22,4 +24,15 @@ func (s State) Equal(o State) bool {
 		}
 	}
 	return true
+}
+
+func (s State) ToString() string {
+	result := ""
+	for i, v := range s.Registers {
+		if i > 0 {
+			result += ", "
+		}
+		result += fmt.Sprintf("%d", v)
+	}
+	return result
 }
