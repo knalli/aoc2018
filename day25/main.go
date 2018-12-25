@@ -55,6 +55,8 @@ func solve(points []Point) int {
 		unprocessed.PushBack(p)
 	}
 
+	morePoints := list.New()
+
 	for unprocessed.Len() > 0 {
 		// This is starting a completely new constellation with index 'c'
 		c := len(constellations)
@@ -69,7 +71,7 @@ func solve(points []Point) int {
 		for { // do.. while foundAny && unprocessed > 0
 			// search for unprocessed points which will belongs to this constellation...
 			foundAny := false
-			morePoints := list.New()
+			morePoints.Init()
 			for _, cPoint := range constellations[c] {
 				// which means any constellation's point can be used for looking up the distance to any unprocessed one...
 				size := unprocessed.Len()
