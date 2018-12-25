@@ -88,8 +88,8 @@ func solve(points []Point) int {
 				foundAny = true
 				constellations[c] = append(constellations[c], i.Value.(Point))
 			}
-			// But: Stop whenever nothing has been found (no other unprocessed point is matching this constellation) or there aren't any left
-			if !foundAny || unprocessed.Len() == 0 {
+			// But: Stop whenever nothing has been found (no other unprocessed point is matching this constellation)
+			if !foundAny {
 				break
 			}
 		}
