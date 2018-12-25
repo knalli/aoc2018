@@ -49,39 +49,47 @@ func parsePoints(lines []string) (result []Point) {
 func solve(points []Point) int {
 	constellations := make(map[int][]Point)
 
+	// list of all points which have to be processed (goal is to clear this list)
 	unprocessed := list.New()
 	for _, p := range points {
 		unprocessed.PushBack(p)
 	}
 
-	for ; unprocessed.Len() > 0; {
+	for unprocessed.Len() > 0 {
+		// This is starting a completely new constellation with index 'c'
 		c := len(constellations)
 		constellations[c] = make([]Point, 0)
+
+		// Starting with the next available point (and adding it into the current constellations)...
 		nextElement := unprocessed.Front()
 		startPoint := nextElement.Value.(Point)
 		unprocessed.Remove(nextElement)
 		constellations[c] = append(constellations[c], startPoint)
-		for {
-			found := false
+
+		for { // do.. while foundAny && unprocessed > 0
+			// search for unprocessed points which will belongs to this constellation...
+			foundAny := false
 			morePoints := list.New()
 			for _, cPoint := range constellations[c] {
+				// which means any constellation's point can be used for looking up the distance to any unprocessed one...
 				size := unprocessed.Len()
-				for n := unprocessed.Front(); size > 0 && n != nil; size-- {
-					point := n.Value.(Point)
-					t := n // remove must be done after $next()
-					n = n.Next()
-					// fmt.Printf("%s -> %s [%d]\n", cPoint.ToString(), point.ToString(), getManhattenDistance(cPoint, point))
+				for i := unprocessed.Front(); size > 0 && i != nil; size-- { // ensure we are running only once for all max
+					elem := i // remove must be done after $next()
+					point := i.Value.(Point)
+					i = i.Next()
 					if getManhattenDistance(cPoint, point) <= 3 {
 						morePoints.PushBack(point)
-						unprocessed.Remove(t)
+						unprocessed.Remove(elem)
 					}
 				}
 			}
+			// If at least one additional point has been found (constellation has been grown), we will have to search at least one time again...
 			for i := morePoints.Front(); i != nil; i = i.Next() {
-				found = true
+				foundAny = true
 				constellations[c] = append(constellations[c], i.Value.(Point))
 			}
-			if !found || unprocessed.Len() == 0 {
+			// But: Stop whenever nothing has been found (no other unprocessed point is matching this constellation) or there aren't any left
+			if !foundAny || unprocessed.Len() == 0 {
 				break
 			}
 		}
