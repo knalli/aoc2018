@@ -6,24 +6,20 @@ import (
 )
 
 type Player struct {
-	PType       int32
+	Group       rune
 	AttackPower int
 	HitPoints   int
 	X           int
 	Y           int
 }
 
-type Players struct {
-	values []Player
-}
-
-func New(pType int32, x int, y int) Player {
+func New(pType rune, x int, y int) Player {
 	return NewWithDetails(pType, 3, 200, x, y)
 }
 
-func NewWithDetails(pType int32, attackPower int, hitPoints int, x int, y int) Player {
+func NewWithDetails(group rune, attackPower int, hitPoints int, x int, y int) Player {
 	return Player{
-		PType:       pType,
+		Group:       group,
 		AttackPower: attackPower,
 		HitPoints:   hitPoints,
 		X:           x,
@@ -31,29 +27,27 @@ func NewWithDetails(pType int32, attackPower int, hitPoints int, x int, y int) P
 	}
 }
 
-func (p Player) Point() grid.Point {
+func (p *Player) Point() grid.Point {
 	return grid.Point{X: p.X, Y: p.Y}
 }
 
-func (p Player) IsAlive() bool {
+func (p *Player) IsAlive() bool {
 	return p.HitPoints > 0
 }
 
-func (p Player) Attack(target *Player) {
+func (p *Player) Attack(target *Player) {
 	target.HitPoints -= p.AttackPower
 }
 
-func NewPlayers(players []Player) Players {
-	return Players{values: players}
+func (p Player) ToString() string {
+	return fmt.Sprintf("%c[%s,HP=%d,AP=%d]", p.Group, p.Point().ToString(), p.HitPoints, p.AttackPower)
 }
 
-func (p Player) ToString() string {
-	return fmt.Sprintf("%c[%s,HP=%d]", p.PType, p.Point().ToString(), p.HitPoints)
-}
+type Players []*Player
 
 func (p Players) ToString() string {
 	result := ""
-	for _, p := range p.values {
+	for _, p := range p {
 		if len(result) > 0 {
 			result += "\n"
 		}
@@ -62,15 +56,35 @@ func (p Players) ToString() string {
 	return result
 }
 
-func (p Players) Do(f func(player Player)) {
-	for _, player := range p.values {
-		f(player)
+func (p Players) Do(f func(player *Player)) {
+	for i := range p {
+		f(p[i])
 	}
 }
 
+func (p Players) IsEmpty(f func(player *Player) bool) bool {
+	return len(p.Filter(f)) == 0
+}
+
+func (p Players) Filter(f func(player *Player) bool) (result Players) {
+	for i := range p {
+		if f(p[i]) {
+			result = append(result, p[i])
+		}
+	}
+	return result
+}
+
+func (p Players) Sum(f func(player *Player) int) (result int) {
+	for i := range p {
+		result += f(p[i])
+	}
+	return result
+}
+
 func (p Players) GetByXY(x int, y int) *Player {
-	for i := range p.values {
-		p := &p.values[i]
+	for i := range p {
+		p := p[i]
 		if p.X == x && p.Y == y {
 			return p
 		}
