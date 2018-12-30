@@ -70,7 +70,6 @@ func findFurthestPointWithShortestPath(grid d15Grid.Grid, start d15Grid.Point, c
 			func(v rune) bool {
 				return v != wall
 			},
-			nil,
 		)
 		d := len(path)
 		if d > 0 {

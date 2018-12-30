@@ -4,6 +4,7 @@ import (
 	"fmt"
 	queue2 "github.com/golang-collections/collections/queue"
 	"github.com/jupp0r/go-priority-queue"
+	"math"
 )
 
 type Grid struct {
@@ -70,11 +71,30 @@ func (g Grid) ToStringWithBorder() string {
 	for i := 0; i < width; i++ {
 		result += fmt.Sprintf("%d", i%10)
 	}
-	result += "\n"
 	for y := 0; y < height; y++ {
+		result += "\n"
 		result += fmt.Sprintf("%d ", y%10)
 		result += string(g.fields[y])
+	}
+	return result
+}
+
+func (g Grid) ToStringWithBorderAndIndent(indent int) string {
+	prefix := ""
+	for i := 0; i < indent; i++ {
+		prefix += " "
+	}
+	result := prefix + "  "
+	height := g.Height()
+	width := g.Width()
+	for i := 0; i < width; i++ {
+		result += fmt.Sprintf("%d", i%10)
+	}
+	for y := 0; y < height; y++ {
 		result += "\n"
+		result += prefix
+		result += fmt.Sprintf("%d ", y%10)
+		result += string(g.fields[y])
 	}
 	return result
 }
@@ -173,7 +193,9 @@ func (p Point) ToString() string {
 }
 
 func (p Point) GetGridPosition(grid *Grid) int {
-	return grid.Width()*p.Y + p.X
+	x := 1 + p.X
+	y := 1 + p.Y
+	return (grid.Width() * y) + x
 }
 
 func (p Point) Top() Point {
@@ -272,27 +294,21 @@ func (g Grid) GetShortestPath(start Point, goal Point, isOpenFn func(value rune)
 	return []Point{}
 }
 
-func (g Grid) GetShortestPathMulti(start Point, goals []Point, isOpenFn func(value rune) bool, heuristic func(from Point, to Point) int) []Point {
-	frontier := queue2.New()
-	frontier.Enqueue([]Point{start})
-	cameFrom := make(map[Point]*Point)
-	for frontier.Len() > 0 {
-		path := frontier.Dequeue().([]Point)
-		current := path[len(path)-1]
-		if contains(goals, current) {
-			return path
+// Resolve the shortest path of any of the given goals; if multiple goals have a shortest path, the first one wins (of occurrence in goals)
+func (g Grid) GetShortestPathMulti(start Point, goals []Point, isOpenFn func(value rune) bool) []Point {
+
+	min := math.MaxInt32
+	result := make([]Point, 0)
+	for _, goal := range goals {
+		t := g.GetShortestPath2(start, goal, isOpenFn)
+		d := len(t)
+		if d > 0 && d < min {
+			result = t
+			min = d
 		}
-		g.ForEachAdjacent(current.X, current.Y, func(next Point, value rune) {
-			if isOpenFn(value) {
-				if _, exist := cameFrom[next]; !exist {
-					frontier.Enqueue(append(path, next))
-					cameFrom[next] = &current
-				}
-			}
-		})
 	}
 
-	return []Point{}
+	return result
 }
 
 func contains(array []Point, search Point) bool {
@@ -304,7 +320,7 @@ func contains(array []Point, search Point) bool {
 	return false
 }
 
-func (g Grid) GetShortestPath2(start Point, goal Point, isOpenFn func(value rune) bool, heuristic func(from Point, to Point) int) []Point {
+func (g Grid) GetShortestPath2(start Point, goal Point, isOpenFn func(value rune) bool) []Point {
 	frontier := pq.New()
 	frontier.Insert(start, 0)
 	cameFrom := make(map[Point]*Point)
